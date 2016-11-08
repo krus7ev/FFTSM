@@ -1,0 +1,126 @@
+//package fftsm;
+
+import java.io.*;
+import java.util.*;
+import java.lang.String;
+import java.lang.Math;
+
+public class MatchEx
+{
+    public static void main(String[] args) 
+    {
+        if (args.length != 1)
+        {
+            System.out.println("Input Error: One input file required!");
+            System.exit(1);
+        }
+        
+        //read input file argument    
+        File inputFile = new File(args[0]);        
+        String[] lineIn = readFile(inputFile);
+        
+        int matLen = lineIn[0].length();
+        int patLen = lineIn[1].length();  
+      
+        //convert to reversed 0-padded array of ASCIIs of power-of-2 length
+        double[] text = formatInput(lineIn[0]);
+        int len = text.length;
+        
+        //convert to 0-padded array of ASCIIs of same length as input text
+        double[] pattern = formatPattern(lineIn[1], text.length);   
+        
+        double[] pXt = FFT.multiply(text, pattern);    
+        
+        double patSqrSum = 0;    
+        for (int i=0; i<patLen; i++)
+            patSqrSum += Math.pow(pattern[i], 2);
+
+        double matSqrSum = 0;
+        for (int j=1; j<=patLen; j++)
+            matSqrSum += Math.pow(text[len-j],2);
+        
+        double[] matches = new double[len];               
+        for(int i=len-1; i>=len-matLen+patLen-1; i--)
+        {
+            if (i<len-1)
+                matSqrSum = matSqrSum - Math.pow(text[i+1], 2) + Math.pow(text[i-patLen+1], 2);
+            
+            //
+            matches[i] = patSqrSum + matSqrSum - 2*pXt[i];               
+            if (matches[i] == 0)
+                System.out.print(len-i + " ");
+        }
+        System.out.println();                                           
+    }
+    
+    public static String[] readFile (File input)
+    {     
+        String[] lineIn  = new String[2];
+        
+        try
+        {            
+            FileReader reader = new FileReader(input);
+            BufferedReader buffer = new BufferedReader(reader);
+            
+            for(int i=0; i<2; i++)
+            {
+                lineIn[i] = buffer.readLine();
+                if(lineIn[i] == null)
+                {
+                    System.out.println("Input Error: Two-line input required!");
+                    System.exit(1);
+                }
+            }
+            if(buffer.readLine() != null)
+            {
+                System.out.println("Input Error: Two-line input required!");
+                System.exit(1);
+            }
+        }
+        catch (IOException e)
+        {
+            System.out.println("Input Error: Reading from file");
+        }
+            
+        return lineIn;      
+    }
+    
+    public static double[] formatInput(String lineIn) 
+    {
+        int len = lineIn.length();
+        double[] textCf = new double[len];
+        for(int i=0; i<len; i++)
+        {
+            textCf[i] = (double)(lineIn.charAt(len-(i+1)));
+        }
+         
+        double lenLog = Math.log(len)/Math.log(2);
+        int newLen = (int)(lenLog);        
+        if (newLen != lenLog)
+            newLen = (int)(Math.pow(2, newLen+1));
+        else
+            newLen = len;
+        
+        double[] text = new double[newLen];
+        Arrays.fill(text, 0);
+        System.arraycopy(textCf, 0, text, newLen-len, len);   
+        
+        return text;        
+    }
+    
+    public static double[] formatPattern(String lineIn, int newLen)
+    {
+        int len = lineIn.length();
+        double[] pattCf = new double[len];
+        for(int i=0; i<len; i++)
+        {
+            pattCf[i] = (double)(lineIn.charAt(i));
+        }
+        
+        double[] pattern = new double[newLen];
+        Arrays.fill(pattern, 0);
+        System.arraycopy(pattCf, 0, pattern, 0, len);
+        
+        return pattern;
+    }   
+}

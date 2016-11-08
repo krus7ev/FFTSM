@@ -1,0 +1,9 @@
+//Wrapper class for question 1
+class Cwk2Question1
+{
+    public static void main (String[] args)
+    {
+        String[] argses = {};
+        Complex.main(argses);
+    }
+}

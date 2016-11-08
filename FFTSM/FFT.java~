@@ -1,0 +1,71 @@
+package FFTSM;
+
+import java.io.*;
+import java.util.*;
+import java.lang.String;
+import java.lang.Math;
+
+class FFT
+{
+    public static void main(String[] args) throws IOException 
+    {
+        //Read polynomial as coefficients from file in specified format
+        try
+        {
+            if (args.length != 1)
+            {
+                System.out.println("Input Error: One input file required!");
+                System.exit(1);
+            }
+                
+            File inputFile = new File(args[0]);
+            FileReader reader = new FileReader(inputFile);            
+            BufferedReader buffer = new BufferedReader(reader);         
+            
+            String lineIn;
+            lineIn = buffer.readLine();
+            
+            if(lineIn == null || buffer.readLine() != null)
+            {
+                System.out.println("Input Error: One line of input required!");
+                System.exit(1);
+            }
+            
+            String[] strVector = lineIn.split("\\s+");
+            double[] coefVector = new double[strVector.length];
+            for(int i=0; i<strVector.length; i++)
+            {
+                coefVector[i] = Double.parseDouble(strVector[i]);
+            }
+            
+            System.out.println(Arrays.toString(coefVector));
+            
+            System.out.println(Math.PI);
+            
+        }
+        catch (IOException e)
+        {
+            System.out.println("Input Error: Reading from file");
+        }
+        catch (NumberFormatException e)
+        {
+            System.out.println("Input Error: Number format");
+        }
+        
+        //Evaluate recursively at complex roots of unity
+       
+               
+    }
+    
+    private Complex[] FFT (double[] A, int N)
+    {
+        if (N==1)
+        {
+            Complex c = new Complex(A[0], 0);
+            return c;
+        }
+        
+        Complex omega = new Complex(1,0);
+    }
+    
+}

@@ -1,0 +1,97 @@
+//package fftsm;
+import java.lang.Math;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
+
+public class Complex
+{
+    public final double re; //real component
+    public final double im; //imaginary component
+    
+    public Complex (double real, double imag)
+    {
+        re = real;
+        im = imag;
+    }
+
+    //Prints out complex numbers according to the format described in Question 2
+    public String toString () 
+    {
+        DecimalFormat df = new DecimalFormat("#.##");
+        df.setRoundingMode(RoundingMode.HALF_DOWN);
+        
+        String reF = df.format(re);//.replaceAll("^-(?=0(.0*)?$)", "");
+        String imF = df.format(im);//.replaceAll("^-(?=0(.0*)?$)", "");
+
+        return reF + "," + imF;     
+    }
+
+    //Complex addition
+    public Complex plus (Complex b)
+    {
+        Complex a = this;
+        
+        double real = this.re + b.re;
+        double imag = this.im + b.im;
+        
+        return new Complex(real, imag);
+    }
+    
+    //Complex subtraction
+    public Complex minus (Complex b)
+    {
+        Complex a = this;
+                
+        double real = a.re - b.re;
+        double imag = a.im - b.im;
+        
+        return new Complex(real, imag);
+    }
+    
+    //Complex Multiplication
+    public Complex times (Complex b)
+    {
+        Complex a = this;
+        
+        double real = a.re * b.re - a.im * b.im;
+        double imag = a.re * b.im + b.re * a.im;
+
+        return new Complex(real, imag);  
+    }
+    
+    //Complex conjugate
+    public Complex conjugate ()
+    {
+        if(im != 0)
+            return new Complex(re, 0 - im);
+        else
+            return this;
+    }
+    
+    public double getReal () { return this.re; }
+    
+    public double getImagine () { return this.im; }
+    
+    public static void main(String[] Args)
+    {
+        Complex a = new Complex(7.0550, 4.0562);
+        Complex b = new Complex(-2.0, 6.0);
+        
+        System.out.println("a = " + a.toString());
+        System.out.println("b = " + b.toString());
+        System.out.println();
+        System.out.println("Re(a) = " + a.getReal());
+        System.out.println("Im(a) = " + a.getImagine());
+        System.out.println();        
+        System.out.println("Re(b) = " + b.getReal());
+        System.out.println("Im(b) = " + b.getImagine());
+        System.out.println();
+        System.out.println("Conj(a) = " + a.conjugate());
+        System.out.println("Conj(b) = " + b.conjugate());
+        System.out.println();
+        System.out.println("a + b = " + a.plus(b));
+        System.out.println("a - b = " + a.minus(b));
+        System.out.println("a * b = " + a.times(b));
+    }
+}
+        

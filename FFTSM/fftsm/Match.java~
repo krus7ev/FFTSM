@@ -1,0 +1,128 @@
+package fftsm;
+
+import java.io.*;
+import java.util.*;
+import java.lang.String;
+import java.lang.Math;
+
+public class Match 
+{
+    public static void main(String[] args) throws IOException 
+    {
+        //Read polynomial as coefficients from file in specified format
+
+        if (args.length != 1)
+        {
+            System.out.println("Input Error: One input file required!");
+            System.exit(1);
+        }
+            
+        File inputFile = new File(args[0]);
+        
+        String[] lineIn = readFile(inputFile);
+                 
+        double[] textCf = new double[lineIn[0].length()];
+        double[] pattCf = new double[lineIn[1].length()];
+      
+        double[] text = formatInput(lineIn, textCf, pattCf);
+        int newLen = text.length; 
+  
+        double[] pattern = new double[newLen];
+        Arrays.fill(pattern, 0);
+        System.arraycopy(pattCf, 0, pattern, 0, pattCf.length);
+
+
+
+        System.out.println("Text ASCIIs pad: " + Arrays.toString(text));      
+        System.out.println("Pattern ASCIIs pad: " + Arrays.toString(pattern));  
+
+
+
+        double[] mXt = FFT.multiply(text, pattern);
+                    
+        double matSqrSum = 0;            
+        double patSqrSum = 0;         
+           
+        for (int i=0; i<pattCf.length; i++)
+            patSqrSum += Math.pow(pattCf[i], 2);
+        
+        double[] matches = new double[newLen];
+        System.out.print("Matches at: ");
+        for(int i=newLen-1; i>= newLen-textCf.length + pattCf.length-1; i--)
+        {
+            for (int j=0; j<pattCf.length; j++)
+                matSqrSum += Math.pow(text[i-j],2);
+            
+            matches[i] = patSqrSum + matSqrSum - 2*mXt[i];
+            
+            matSqrSum = 0;               
+            if (matches[i] == 0)
+                System.out.print(newLen-i + " ");
+        }
+        System.out.println();
+                                            
+    }
+    
+    public static String[] readFile (File input)
+    {     
+        String[] lineIn  = new String[2];
+        
+        try
+        {            
+            FileReader reader = new FileReader(input);
+            BufferedReader buffer = new BufferedReader(reader);
+            
+            for(int i=0; i<2; i++)
+            {
+                lineIn[i] = buffer.readLine();
+                if(lineIn[i] == null)
+                {
+                    System.out.println("Input Error: Two-line input required!");
+                    System.exit(1);
+                }
+            }
+            if(buffer.readLine() != null)
+            {
+                System.out.println("Input Error: Two-line input required!");
+                System.exit(1);
+            }
+        }
+        catch (IOException e)
+        {
+            System.out.println("Input Error: Reading from file");
+        }
+            
+        return lineIn;      
+    }
+    
+    public static double[] formatInput(String[] lineIn, double[] textCf, double[] pattCf) 
+    {
+        for(int i=0; i<lineIn[0].length(); i++)
+        {
+            textCf[i] = (double)(lineIn[0].charAt(lineIn[0].length()-(i+1)));
+            //if(textCf[i] == 63)
+                //textCf[i] = 0;
+        }
+        for(int i=0; i<lineIn[1].length(); i++)
+        {
+            pattCf[i] = (double)(lineIn[1].charAt(i));
+            //if(pattCf[i] == 63)
+                //pattCf[i] = 0;
+        }
+         
+        double lenP = Math.log(textCf.length) / Math.log(2);
+        int intLen = (int)(lenP);
+        int newLen;
+        
+        if (lenP != intLen)
+            newLen = (int)(Math.pow(2, intLen+1));
+        else
+            newLen = textCf.length;
+        
+        double[] text = new double[newLen];
+        Arrays.fill(text, 0);
+        System.arraycopy(textCf, 0, text, text.length - textCf.length, textCf.length);   
+        
+        return text;        
+    }   
+}

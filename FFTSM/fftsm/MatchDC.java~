@@ -1,0 +1,107 @@
+//package fftsm;
+
+import java.io.*;
+import java.util.*;
+import java.lang.String;
+import java.lang.Math;
+
+public class MatchDC
+{
+    public static void main (String[] args)
+    {
+        if (args.length != 1)
+        {
+            System.out.println("Input Error: One input file required!");
+            System.exit(1);
+        }
+            
+        File inputFile = new File(args[0]);        
+        String[] lineIn = MatchEx.readFile(inputFile);
+        
+        int matLen = lineIn[0].length();
+        int patLen = lineIn[1].length();  
+      
+        double[] text = formatInput(lineIn[0]);
+        int len = text.length;
+          
+        double[] pattern = formatPattern(lineIn[1], text.length);   
+        
+        double[] patSqrs = new double[len];
+        double[] patCubs = new double[len];
+        Arrays.fill(patSqrs, 0);
+        Arrays.fill(patCubs, 0);
+        for (int i=0; i<patLen; i++)
+        {
+            patSqrs[i] = Math.pow(pattern[i], 2);
+            patCubs[i] = Math.pow(pattern[i], 3);
+        }
+        
+        double[] texSqrs = new double[len];
+        double[] texCubs = new double[len];
+        Arrays.fill(texSqrs, 0);
+        Arrays.fill(texCubs, 0);
+        for (int i=len-1; i>len-matLen-1; i--)
+        {
+            texSqrs[i] = Math.pow(text[i], 2);
+            texCubs[i] = Math.pow(text[i], 3);
+        }
+        
+        double[] p3Xt  = FFT.multiply(patCubs, text);
+        double[] p2Xt2 = FFT.multiply(patSqrs, texSqrs);
+        double[] pXt3  = FFT.multiply(texCubs, pattern);
+        
+        
+        double[] matches = new double[len];               
+        for(int i=len-1; i>=len-matLen+patLen-1; i--)
+        {
+            
+            matches[i] = p3Xt[i] - 2*p2Xt2[i] + pXt3[i];               
+            if (matches[i] == 0)
+                System.out.print(len-i + " ");
+        }
+        System.out.println();
+    }
+    
+    public static double[] formatInput(String lineIn) 
+    {
+        int len = lineIn.length();
+        double[] textCf = new double[len];
+        double in;
+        for(int i=0; i<len; i++)
+        {
+            in = (double)(lineIn.charAt(len-(i+1)));
+            textCf[i] = (in==63) ? 0 : in;
+        }
+         
+        double lenLog = Math.log(len)/Math.log(2);
+        int newLen = (int)(lenLog);        
+        if (newLen != lenLog)
+            newLen = (int)(Math.pow(2, newLen+1));
+        else
+            newLen = len;
+        
+        double[] text = new double[newLen];
+        Arrays.fill(text, 0);
+        System.arraycopy(textCf, 0, text, newLen-len, len);   
+        
+        return text;        
+    }
+    
+    public static double[] formatPattern(String lineIn, int newLen)
+    {
+        int len = lineIn.length();
+        double[] pattCf = new double[len];
+        double in;
+        for(int i=0; i<len; i++)
+        {
+            in = (double)(lineIn.charAt(i));
+            pattCf[i] = (in==63) ? 0 : in;                
+        }
+        
+        double[] pattern = new double[newLen];
+        Arrays.fill(pattern, 0);
+        System.arraycopy(pattCf, 0, pattern, 0, len);
+        
+        return pattern;
+    }
+}
